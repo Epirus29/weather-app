@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather by Zip Code</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #ece9e6, #ffffff);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        label, input, button {
+            font-size: 1.2em;
+        }
+        input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-right: 10px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        p {
+            margin-top: 20px;
+            font-size: 1.3em;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Weather Lookup</h1>
+    <div>
+        <label for="zip">Enter ZIP Code:</label>
+        <input type="text" id="zip" maxlength="5">
+        <button onclick="getWeather()">Get Temperature</button>
+    </div>
+    <p id="output"></p>
+
+    <script>
+        async function getWeather() {
+            const zip = document.getElementById('zip').value;
+            const output = document.getElementById('output');
+
+            if (!/^[0-9]{5}$/.test(zip)) {
+                output.textContent = "Please enter a valid 5-digit ZIP code.";
+                return;
+            }
+
+            try {
+                const zipResponse = await axios.get(`https://api.zippopotam.us/us/${zip}`);
+                const place = zipResponse.data.places[0];
+                const lat = place.latitude;
+                const lon = place.longitude;
+
+                const weatherResponse = await axios.get(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                const tempC = weatherResponse.data.current_weather.temperature;
+                const tempF = (tempC * 9/5 + 32).toFixed(1);
+
+                output.textContent = `The current temperature in ${place['place name']}, ${place['state abbreviation']} is ${tempC}°C / ${tempF}°F.`;
+            } catch (error) {
+                output.textContent = "Failed to retrieve weather data. Please check the ZIP code or try again later.";
+            }
+        }
+    </script>
+</body>
+</html>

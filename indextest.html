@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Celestial Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: black;
+            overflow: hidden;
+            height: 100%;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        #chat-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 600px;
+            background-color: rgba(0, 255, 255, 0.05);
+            border: 2px solid #00FFFF;
+            padding: 20px;
+            color: #00FFFF;
+            z-index: 1;
+        }
+
+        #messages {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+        }
+
+        #input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: black;
+            color: #00FFFF;
+            border: 1px solid #00FFFF;
+            font-family: inherit;
+        }
+
+        #messages {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="stars"></canvas>
+    <div id="chat-box">
+        <div id="messages">AI> Welcome to Celestial Chat. Ask the stars something.</div>
+        <input type="text" id="input" placeholder="Type a message...">
+    </div>
+
+    <script>
+        const canvas = document.getElementById('stars');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const stars = Array.from({ length: 750 }, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            radius: Math.random() * 1.5 + 0.5,
+            dx: (Math.random() - 0.5) * 0.2,
+            dy: (Math.random() - 0.5) * 0.2,
+        }));
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw lines for constellations
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            for (let i = 0; i < stars.length; i++) {
+                for (let j = i + 1; j < stars.length; j++) {
+                    const a = stars[i];
+                    const b = stars[j];
+                    const dist = Math.hypot(a.x - b.x, a.y - b.y);
+                    if (dist < 100) {
+                        ctx.moveTo(a.x, a.y);
+                        ctx.lineTo(b.x, b.y);
+                    }
+                }
+            }
+            ctx.stroke();
+
+            // Draw stars
+            stars.forEach(star => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, 2 * Math.PI);
+                ctx.fillStyle = 'white';
+                ctx.fill();
+            });
+        }
+
+        function animate() {
+            stars.forEach(star => {
+                star.x += star.dx;
+                star.y += star.dy;
+
+                if (star.x < 0 || star.x > canvas.width) star.dx *= -1;
+                if (star.y < 0 || star.y > canvas.height) star.dy *= -1;
+            });
+
+            drawStars();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        const input = document.getElementById('input');
+        const messages = document.getElementById('messages');
+
+        input.addEventListener('keydown', async function (e) {
+            if (e.key === 'Enter') {
+                const msg = input.value.trim();
+                if (!msg) return;
+
+                messages.innerHTML += `\n> ${msg}`;
+                input.value = '';
+
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: msg })
+                });
+
+                const data = await response.json();
+                messages.innerHTML += `\nAI> ${data.reply || '[No response]'}`;
+                messages.scrollTop = messages.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>

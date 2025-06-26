@@ -24,6 +24,8 @@
       max-width: 400px;
       margin-left: auto;
       margin-right: auto;
+      pointer-events: none;
+      opacity: 0.5;
     }
     .hole {
       width: 100%;
@@ -106,7 +108,7 @@
   <div id="score">Score: 0</div>
   <div id="high-score">High Score: 0</div>
   <div id="message"></div>
-  <button onclick="startGame()">Restart Game</button>
+  <button id="startBtn">Start Game</button>
 
   <audio id="whackSound" src="https://freesound.org/data/previews/198/198841_285997-lq.mp3"></audio>
 
@@ -142,6 +144,7 @@
     let highScore = 0;
     let lastHole;
     let timeUp = false;
+    let gameTimer;
 
     function randomTime(min, max) {
       return Math.round(Math.random() * (max - min) + min);
@@ -184,12 +187,18 @@
     }
 
     function startGame() {
+      clearTimeout(gameTimer);
       score = 0;
       $('#score').text('Score: ' + score);
       $('#message').text('');
       timeUp = false;
+      $('.game-board').css({'pointer-events': 'auto', 'opacity': '1'});
       peep();
-      setTimeout(() => timeUp = true, 20000);
+      gameTimer = setTimeout(() => {
+        timeUp = true;
+        $('.game-board').css({'pointer-events': 'none', 'opacity': '0.5'});
+      }, 20000);
+      $('#startBtn').text('Restart Game');
     }
 
     $('.mole').on('click', function() {
@@ -204,7 +213,7 @@
       document.getElementById('whackSound').play();
     });
 
-    $(document).ready(function() {
+    $('#startBtn').on('click', function() {
       startGame();
     });
   </script>

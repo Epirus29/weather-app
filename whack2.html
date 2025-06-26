@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Whack-a-Mole of Life</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #232526, #414345);
+      color: #eee;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    .game-board {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 20px;
+      justify-content: center;
+      margin-top: 20px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+    .hole {
+      width: 100%;
+      padding-top: 100%;
+      background: #333;
+      border-radius: 50%;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .hole-label {
+      position: absolute;
+      bottom: -25px;
+      width: 100%;
+      text-align: center;
+      color: #ccc;
+      font-size: 0.85em;
+    }
+    .mole {
+      width: 80%;
+      height: 80%;
+      background: brown;
+      border-radius: 50%;
+      position: absolute;
+      top: 100%;
+      left: 10%;
+      transition: top 0.3s ease;
+    }
+    .mole.up {
+      top: 10%;
+    }
+    #score, #high-score, #message {
+      margin-top: 20px;
+      font-size: 1.2em;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background-color: #444;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    .essay {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #222;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: left;
+      font-size: 1em;
+    }
+    .essay h2 {
+      text-align: center;
+    }
+    @media (max-width: 500px) {
+      .essay {
+        font-size: 0.95em;
+        padding: 15px;
+      }
+      button {
+        width: 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Whack-a-Mole of Life</h1>
+  <p>Pop up too long in one area, and life will find you...</p>
+  <div class="game-board">
+    <div class="hole" data-hole="1"><div class="mole"></div><div class="hole-label">Career</div></div>
+    <div class="hole" data-hole="2"><div class="mole"></div><div class="hole-label">Love</div></div>
+    <div class="hole" data-hole="3"><div class="mole"></div><div class="hole-label">Ego</div></div>
+    <div class="hole" data-hole="4"><div class="mole"></div><div class="hole-label">Health</div></div>
+    <div class="hole" data-hole="5"><div class="mole"></div><div class="hole-label">Spirituality</div></div>
+    <div class="hole" data-hole="6"><div class="mole"></div><div class="hole-label">Creativity</div></div>
+  </div>
+  <div id="score">Score: 0</div>
+  <div id="high-score">High Score: 0</div>
+  <div id="message"></div>
+  <button id="startBtn">Start Game</button>
+
+  <audio id="whackSound" src="https://freesound.org/data/previews/198/198841_285997-lq.mp3"></audio>
+
+  <div class="essay">
+    <h2>The Game of Whack-a-Mole</h2>
+    <p><strong>Life is not linear. It is not a ladder. It is not a climb.</strong><br>
+    It is a machine — absurd and ancient — and we are the moles.</p>
+
+    <p>Not to be beaten, but to be <em>reminded</em>.</p>
+
+    <p>Every time we pop our heads up too high in one area of life — ego, success, relationships, ambition — the hammer comes. Not to punish, but to rebalance.</p>
+
+    <p>We forget that there are other holes.<br>
+    We forget that life is not just about getting high in one area.<br>
+    It’s about <strong>attention</strong>. <strong>Balance.</strong> <strong>Awareness.</strong></p>
+
+    <p>The hammer is the teacher.<br>
+    Pain is perspective.<br>
+    Failure is feedback.</p>
+
+    <p>And sometimes the deepest lesson is this:<br>
+    That life doesn’t want us perfect. It wants us <strong>present</strong>.</p>
+
+    <p>The moment we think we’ve figured it out — that’s often when we’re most vulnerable. The hammer comes not because we are wrong, but because we’ve stayed too long in one space, ignoring the others.</p>
+
+    <p>True growth isn’t in avoiding the hits.<br>
+    It’s in learning when to pop up — and when to move on.</p>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    let score = 0;
+    let highScore = 0;
+    let lastHole;
+    let timeUp = false;
+    let gameTimer;
+
+    function randomTime(min, max) {
+      return Math.round(Math.random() * (max - min) + min);
+    }
+
+    function randomHole(holes) {
+      const idx = Math.floor(Math.random() * holes.length);
+      const hole = holes.eq(idx);
+      if (hole.is(lastHole)) {
+        return randomHole(holes);
+      }
+      lastHole = hole;
+      return hole;
+    }
+
+    function randomMessage(label) {
+      const messages = {
+        'Career': "Work isn't everything.",
+        'Love': "Don't lose yourself in others.",
+        'Ego': "Humility is power.",
+        'Health': "Take care of your vessel.",
+        'Spirituality': "Stay grounded, even while seeking.",
+        'Creativity': "Not every idea needs to be gold."
+      };
+      return messages[label] || "Rebalance, mole.";
+    }
+
+    function peep() {
+      const time = randomTime(500, 1500);
+      const holes = $('.hole');
+      const hole = randomHole(holes);
+      const mole = hole.find('.mole');
+      const label = hole.find('.hole-label').text();
+      mole.addClass('up');
+      setTimeout(() => {
+        mole.removeClass('up');
+        $('#message').text(randomMessage(label));
+        if (!timeUp) peep();
+      }, time);
+    }
+
+    function startGame() {
+      clearTimeout(gameTimer);
+      score = 0;
+      $('#score').text('Score: ' + score);
+      $('#message').text('');
+      timeUp = false;
+      $('.game-board').css({'pointer-events': 'auto', 'opacity': '1'});
+      peep();
+      gameTimer = setTimeout(() => {
+        timeUp = true;
+        $('.game-board').css({'pointer-events': 'none', 'opacity': '0.5'});
+      }, 20000);
+      $('#startBtn').text('Restart Game');
+    }
+
+    $('.mole').on('click', function() {
+      if (!$(this).hasClass('up')) return;
+      score++;
+      $(this).removeClass('up');
+      $('#score').text('Score: ' + score);
+      if (score > highScore) {
+        highScore = score;
+        $('#high-score').text('High Score: ' + highScore);
+      }
+      document.getElementById('whackSound').play();
+    });
+
+    $('#startBtn').on('click', function() {
+      startGame();
+    });
+  </script>
+</body>
+</html>

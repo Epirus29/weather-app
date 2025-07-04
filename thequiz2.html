@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Obama vs Trump Trust Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .question {
+      margin: 30px 0;
+      text-align: center;
+    }
+    .options {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+    }
+    .options img {
+      width: 180px;
+      height: auto;
+      border: 4px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border 0.3s ease;
+    }
+    .options img:hover {
+      border: 4px solid #007BFF;
+    }
+    #results, #stats {
+      display: none;
+      margin-top: 40px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table th, table td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+    table th {
+      background-color: #eee;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Who Would You Trust More?</h1>
+<p style="text-align:center;">Assume neither person receives help from staff, advisors, or anyone else.</p>
+
+<div id="quiz"></div>
+
+<div id="results">
+  <h2>Your Results</h2>
+  <p id="score"></p>
+</div>
+
+<div id="stats">
+  <h2>Comparison Stats: Obama vs. Trump</h2>
+  <table>
+    <tr><th>Category</th><th>Barack Obama</th><th>Donald Trump</th></tr>
+    <tr><td>Wives</td><td>1 (Michelle Obama)</td><td>3 (Ivana, Marla, Melania)</td></tr>
+    <tr><td>Impeachments</td><td>0</td><td>2 (both acquitted)</td></tr>
+    <tr><td>Felony Convictions</td><td>0</td><td>34 (as of May 2024)</td></tr>
+    <tr><td>Civil Rape Cases (Liable)</td><td>0</td><td>1 (E. Jean Carroll case)</td></tr>
+    <tr><td>Business Bankruptcies</td><td>0</td><td>6 (business)</td></tr>
+    <tr><td>Failed Business Ventures</td><td>Few (no major public failures)</td><td>Multiple (Trump Steaks, Trump University, etc.)</td></tr>
+    <tr><td>EOs Challenged in Court</td><td>Very few, mostly upheld</td><td>Many (immigration, census, etc.)</td></tr>
+    <tr><td>EOs Overturned/Blocked</td><td>Minimal</td><td>Several overturned or blocked</td></tr>
+  </table>
+  <div style="display: flex; justify-content: center; gap: 20px; margin-top: 30px;">
+  <div style="text-align:center;">
+    <img src="https://newsone.com/wp-content/uploads/sites/22/2021/06/16237901108316.jpg?w=1024&strip=all&quality=80" alt="Obama with kids" style="max-width: 100%; height: auto; border: 1px solid #ccc; border-radius: 8px;">
+    <p style="margin-top: 5px;">Barack Obama greeting children</p>
+  </div>
+  <div style="text-align:center;">
+    <img src="https://www.atlanticcouncil.org/wp-content/uploads/2021/06/RTS1VNZ6-e1624283310195.jpg" alt="Trump with Putin" style="max-width: 100%; height: auto; border: 1px solid #ccc; border-radius: 8px;">
+    <p style="margin-top: 5px;">Donald Trump with Vladimir Putin</p>
+  </div>
+</div>
+</div>
+
+<script>
+const questions = [
+  "Who would you trust more to watch your baby for 4 hours while you go out to dinner?",
+  "Who would you trust more to take care of your grandma in hospice while you step away?",
+  "Who would you trust more to calm things down during a major crisis?",
+  "Who do you think is in better shape physically?",
+  "Who do you think is in better shape mentally?",
+  "Who do you think better understands American values?",
+  "Who has shown a stronger family unit (marriages, parenting, history)?",
+  "Who do you think respects the Constitution more?",
+  "Who has had more executive orders ruled unconstitutional?",
+  "Who would you trust with your online banking login for 24 hours?",
+  "Who would treat service workers better when no one is watching?",
+  "Who would you trust to handle a hostage negotiation calmly and wisely?",
+  "Who would you rather have as your next-door neighbor?",
+  "Who would be more honest under oath?"
+];
+
+let current = 0;
+let obamaScore = 0;
+let trumpScore = 0;
+
+function renderQuestion() {
+  if (current >= questions.length) {
+    document.getElementById("quiz").style.display = "none";
+    document.getElementById("results").style.display = "block";
+    document.getElementById("stats").style.display = "block";
+    document.getElementById("score").innerText =
+      `You selected Obama: ${obamaScore} time(s), Trump: ${trumpScore} time(s).`;
+    return;
+  }
+
+  const q = questions[current];
+  document.getElementById("quiz").innerHTML = `
+    <div class="question">
+      <h2>Question ${current + 1} of ${questions.length}</h2>
+      <p>${q}</p>
+      <div class="options">
+        <div onclick="select('obama')">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/8/8d/President_Barack_Obama.jpg" alt="Obama">
+          <p>Obama</p>
+        </div>
+        <div onclick="select('trump')">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/56/Donald_Trump_official_portrait.jpg" alt="Trump">
+          <p>Trump</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function select(choice) {
+  if (choice === 'obama') obamaScore++;
+  if (choice === 'trump') trumpScore++;
+  current++;
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+
+</body>
+</html>

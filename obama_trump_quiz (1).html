@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Who Would You Trust More?</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2em;
+    }
+    .question {
+      margin: 30px 0;
+      font-size: 1.2em;
+    }
+    .choice {
+      display: inline-block;
+      margin: 10px;
+      cursor: pointer;
+    }
+    .choice img {
+      width: 150px;
+      height: auto;
+      border: 3px solid transparent;
+      border-radius: 10px;
+    }
+    .choice:hover img {
+      border-color: #555;
+    }
+    .hidden {
+      display: none;
+    }
+    .results {
+      font-weight: bold;
+      font-size: 1.4em;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Who Would You Trust More?<br><small>(Assume no outside help from staff, advisors, or family.)</small></h1>
+  <div id="quiz"></div>
+  <div class="results hidden" id="results"></div>
+
+  <script>
+    const questions = [
+      "Who would you trust more to watch your baby for 4 hours while you go out to dinner?",
+      "Who would you trust more to take care of your grandma in hospice while you step away?",
+      "Who would you trust more to calm things down during a major crisis?",
+      "Who do you think is in better shape physically?",
+      "Who do you think is in better shape mentally?",
+      "Who do you think cares more about American values?",
+      "Who do you think has a stronger/more American family unit (divorces, kids, and history)?",
+      "Who do you think has followed the Constitution more faithfully?",
+      "Who do you think has signed more unconstitutional executive orders?",
+      "Who would you trust more to understand your grocery bill?",
+      "Who would you trust to spend a night without assistants, cleaners, or chefs?",
+      "Who do you think reads more books per year?",
+      "Who do you think would be more likely to eat at a Waffle House without complaining?",
+      "Who do you think would last longer without access to Twitter or the internet?",
+      "Who do you think would be more respectful in church if they were a guest?",
+      "Who do you think has had more long-term friendships with regular Americans?",
+      "Who do you think is less likely to lash out at others when criticized?",
+      "Who do you think is less obsessed with media coverage about themselves?"
+    ];
+
+    let current = 0;
+    let scores = { obama: 0, trump: 0 };
+
+    const quizDiv = document.getElementById('quiz');
+    const resultsDiv = document.getElementById('results');
+
+    function renderQuestion() {
+      if (current >= questions.length) {
+        const winner = scores.obama > scores.trump ? "Barack Obama" : "Donald Trump";
+        resultsDiv.classList.remove("hidden");
+        resultsDiv.innerHTML = `You trust <strong>${winner}</strong> more overall.<br><br>Obama: ${scores.obama} | Trump: ${scores.trump}`;
+        quizDiv.innerHTML = "";
+        return;
+      }
+
+      const question = questions[current];
+      quizDiv.innerHTML = `
+        <div class="question">${question}</div>
+        <div class="choice" onclick="vote('obama')">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/8/8d/President_Barack_Obama.jpg" alt="Barack Obama">
+          <div>Barack Obama</div>
+        </div>
+        <div class="choice" onclick="vote('trump')">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/56/Donald_Trump_official_portrait.jpg" alt="Donald Trump">
+          <div>Donald Trump</div>
+        </div>
+      `;
+    }
+
+    function vote(choice) {
+      scores[choice]++;
+      current++;
+      renderQuestion();
+    }
+
+    renderQuestion();
+  </script>
+</body>
+</html>

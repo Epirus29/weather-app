@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Smash VOD Finder — VGBC + BTSSmash</title>
+<style>
+  :root{--bg:#0f1115;--panel:#151a22;--muted:#a7afc0;--text:#e6e8ef;--accent:#7aa2ff;--accent2:#32d3a0;--border:#273048}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+  header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;justify-content:space-between}
+  header h1{margin:0;font-size:16px}
+  .wrap{max-width:1100px;margin:0 auto;padding:14px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px}
+  .input{background:#0b0f17;border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:10px}
+  .btn{background:#0f1422;border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+  .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:0;color:#0a0d14}
+  .pill{border:1px solid var(--border);padding:6px 10px;border-radius:999px;cursor:pointer;background:#0b0f17}
+  .pill.active{outline:2px solid var(--accent)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:12px}
+  .vod{background:#0a0f17;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .vod iframe{width:100%;aspect-ratio:16/9;border:0}
+  .vod .meta{padding:10px}
+  .note{color:var(--muted);font-size:12px}
+  .right{margin-left:auto}
+</style>
+</head>
+<body>
+<header>
+  <h1>Smash VOD Finder — VGBC & BTSSmash</h1>
+  <div class="row">
+    <button id="saveBtn" class="btn">Save API key</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <div class="row">
+      <input id="apiKey" class="input" placeholder="YouTube Data API key (stored locally)" style="min-width:280px;flex:1" />
+      <button id="go" class="btn primary">Fetch recent matches</button>
+      <span class="note">No server required. Your key stays in your browser (localStorage).</span>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div id="channels" class="row">
+        <button class="pill active" data-handle="vgbootcamp">@vgbootcamp</button>
+        <button class="pill active" data-handle="BTSsmash">@BTSSmash</button>
+      </div>
+      <span class="right"></span>
+      <input id="q" class="input" placeholder="Filter title (e.g., Grand Finals, Zain vs)" style="min-width:260px">
+      <select id="game" class="input">
+        <option value="">Any game</option>
+        <option value="Ultimate">Ultimate only</option>
+        <option value="Melee">Melee only</option>
+      </select>
+      <select id="limit" class="input">
+        <option value="12">Show 12</option>
+        <option value="24">Show 24</option>
+        <option value="48">Show 48</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="results" class="grid"></div>
+  <p id="status" class="note" style="margin-top:8px"></p>
+
+  <details class="card" style="margin-top:12px">
+    <summary>How it works</summary>
+    <ul class="note">
+      <li>Resolves channel IDs for <b>@vgbootcamp</b> and <b>@BTSSmash</b> using the YouTube Data API, then pulls recent uploads.</li>
+      <li>Filters likely match VODs by title patterns (e.g., <code>vs</code>, <code>Winners</code>, <code>Grand Finals</code>, <code>Top 8</code>).
+      You can still search anything with the filter box.</li>
+      <li>Everything runs client‑side; enter your own API key and it stays in localStorage.</li>
+    </ul>
+  </details>
+</div>
+
+<script>
+const $ = (s, r=document)=>r.querySelector(s);
+const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+const STORAGE_KEY = 'smash_vod_finder_key_v1';
+const DEFAULT_HANDLES = ['vgbootcamp', 'BTSsmash'];
+
+// Load/save key
+$('#apiKey').value = localStorage.getItem(STORAGE_KEY)||'';
+$('#saveBtn').onclick=()=>{ localStorage.setItem(STORAGE_KEY, $('#apiKey').value.trim()); flash('Saved ✅'); };
+
+function flash(msg){ const el=$('#status'); el.textContent=msg; setTimeout(()=>{if(el.textContent===msg) el.textContent='';}, 4000); }
+
+// Toggle channels
+$$('#channels .pill').forEach(p=>{
+  p.onclick=()=>{ p.classList.toggle('active'); };
+});
+
+// Helpers
+async function yt(endpoint, params){
+  const key = ($('#apiKey').value||'').trim();
+  if(!key) throw new Error('Missing API key');
+  const url = new URL('https://www.googleapis.com/youtube/v3/'+endpoint);
+  Object.entries(params).forEach(([k,v])=> url.searchParams.set(k,v));
+  url.searchParams.set('key', key);
+  const res = await fetch(url); if(!res.ok) throw new Error('YouTube API: '+res.status+' '+res.statusText);
+  return res.json();
+}
+
+async function resolveChannelId(handle){
+  // Use search.list to find the channelId for a handle (e.g., vgbootcamp)
+  const data = await yt('search', { part:'snippet', q: handle, type:'channel', maxResults:1 });
+  const item = data.items && data.items[0];
+  if(!item) throw new Error('Channel not found for '+handle);
+  return item.snippet && item.snippet.channelId || item.id && item.id.channelId;
+}
+
+async function fetchRecentUploads(channelId, n=25){
+  // Use search.list to get recent videos by channel
+  const data = await yt('search', {
+    part:'snippet', channelId, order:'date', maxResults: Math.min(n,50), type:'video'
+  });
+  return (data.items||[]).map(x=>({
+    id: x.id.videoId,
+    title: x.snippet.title,
+    publishedAt: x.snippet.publishedAt,
+    channelTitle: x.snippet.channelTitle
+  }));
+}
+
+function looksLikeMatch(title){
+  const t = title.toLowerCase();
+  const tokens = [' vs ', 'vs.', 'grand finals', 'winners finals', 'losers finals', 'top 8', 'top 16', 'quarterfinal', 'semifinal', 'pools'];
+  return tokens.some(k=> t.includes(k));
+}
+
+function gameFilter(title){
+  const t = title.toLowerCase();
+  if($('#game').value==='Melee') return /melee|ssbm/.test(t);
+  if($('#game').value==='Ultimate') return /ultimate|ssbu/.test(t);
+  return true;
+}
+
+function render(vods){
+  const grid = $('#results'); grid.innerHTML='';
+  if(!vods.length){ grid.innerHTML = '<p class="note">No videos matched your filters.</p>'; return; }
+  vods.forEach(v=>{
+    const div = document.createElement('div');
+    div.className='vod';
+    div.innerHTML = `
+      <iframe loading="lazy" src="https://www.youtube.com/embed/${v.id}" allowfullscreen title="${v.title.replace(/"/g,'&quot;')}"></iframe>
+      <div class="meta">
+        <div style="font-weight:600">${v.title}</div>
+        <div class="note">${new Date(v.publishedAt).toLocaleString()} • ${v.channelTitle}</div>
+        <div style="margin-top:6px"><a class="btn" href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener">Open on YouTube</a></div>
+      </div>`;
+    grid.appendChild(div);
+  });
+}
+
+async function run(){
+  try{
+    $('#status').textContent = 'Fetching…';
+    const limit = parseInt($('#limit').value,10)||12;
+    const handles = $$('#channels .pill.active').map(p=>p.dataset.handle);
+    if(!handles.length) throw new Error('Select at least one channel.');
+
+    const ids = [];
+    for(const h of handles){ ids.push(await resolveChannelId(h)); }
+
+    let vods = [];
+    for(const id of ids){ vods = vods.concat(await fetchRecentUploads(id, 50)); }
+
+    // Filter to likely match VODs and user filters
+    const q = ($('#q').value||'').trim().toLowerCase();
+    vods = vods.filter(v=> looksLikeMatch(v.title) && gameFilter(v.title) && (!q || v.title.toLowerCase().includes(q)));
+    vods.sort((a,b)=> new Date(b.publishedAt) - new Date(a.publishedAt));
+    render(vods.slice(0, limit));
+    $('#status').textContent = `Showing ${Math.min(limit, vods.length)} of ${vods.length} matched videos`;
+  }catch(err){
+    render([]);
+    $('#status').textContent = 'Error: '+err.message + ' — Make sure your API key is valid and quota is available.';
+  }
+}
+
+$('#go').onclick = run;
+
+</script>
+</body>
+</html>

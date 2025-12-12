@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vanilla WoW — Class Spells by Level</title>
+<style>
+  :root{--bg:#0e1014;--panel:#151a22;--muted:#a7afc0;--text:#e6e8ef;--accent:#7aa2ff;--border:#273048}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+  header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;justify-content:space-between}
+  header h1{margin:0;font-size:16px}
+  .app{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 52px)}
+  aside{border-right:1px solid var(--border);padding:12px;overflow:auto}
+  main{padding:12px;overflow:auto}
+  .input{background:#0b0f17;border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:10px;width:100%}
+  .btn{background:#0f1422;border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+  .btn.small{padding:6px 10px;font-size:12px}
+  .class-btn{display:block;width:100%;text-align:left;padding:10px;border:1px solid var(--border);background:#0b0f17;border-radius:10px;margin:6px 0;cursor:pointer}
+  .class-btn.active{outline:2px solid var(--accent)}
+  .note{color:var(--muted);font-size:12px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px}
+  table{width:100%;border-collapse:separate;border-spacing:0 6px}
+  th,td{text-align:left;padding:10px 12px}
+  thead th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  tbody tr{background:#0a0f17;border:1px solid var(--border)}
+  tbody td:first-child{border-radius:8px 0 0 8px}
+  tbody td:last-child{border-radius:0 8px 8px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>Vanilla WoW — Every class → spells learned by level</h1>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button id="exportBtn" class="btn small">Export JSON</button>
+    <label class="btn small" for="fileInput">Import JSON</label>
+    <input id="fileInput" type="file" accept="application/json" hidden />
+  </div>
+</header>
+
+<div class="app">
+  <aside>
+    <input id="classSearch" class="input" placeholder="Search classes… (Ctrl/⌘+K)" />
+    <div id="classList" style="margin-top:8px"></div>
+    <p class="note">No server required • Works offline • Your edits save to localStorage</p>
+  </aside>
+  <main>
+    <div class="card" style="padding:12px">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <strong id="classTitle">Select a class</strong>
+        <span id="abilityCount" class="note"></span>
+        <span style="margin-left:auto"></span>
+        <input id="filter" class="input" placeholder="Filter spells… ( / )" style="max-width:320px" />
+        <input id="minLevel" class="input" type="number" min="1" max="60" step="1" placeholder="Min level" style="width:120px" />
+      </div>
+      <div id="tableWrap" style="margin-top:8px"></div>
+      <p class="note" style="margin-top:8px">Tip: Export the JSON, add missing spells/levels, then Import it back for a complete dataset.</p>
+    </div>
+
+    <details class="card" style="margin-top:12px">
+      <summary style="padding:10px 12px">Data schema</summary>
+      <pre class="note" style="white-space:pre-wrap;padding:0 12px 12px 12px">{
+  "classes": [
+    {
+      "name": "Mage",
+      "abilities": [
+        {"name":"Fireball","level":1},
+        {"name":"Frostbolt","level":4}
+      ]
+    }
+  ]
+}</pre>
+    </details>
+  </main>
+</div>
+
+<script>
+const STORAGE_KEY = 'vanilla_wow_spells_v1';
+const $ = (s, r=document) => r.querySelector(s);
+function save(data){ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+function load(){ try{ const raw = localStorage.getItem(STORAGE_KEY); if(raw) return JSON.parse(raw);}catch{} return DEFAULT_DATA; }
+
+// NOTE: Initial dataset is a practical starter. Add more via Import to make it exhaustive.
+const DEFAULT_DATA = { classes: [
+  { name:'Warrior', abilities:[
+    {name:'Battle Shout',level:1},{name:'Heroic Strike',level:1},{name:'Rend',level:4},{name:'Charge',level:4},{name:'Thunder Clap',level:6},{name:'Hamstring',level:8},{name:'Taunt',level:10},{name:'Sunder Armor',level:10},{name:'Overpower',level:12},{name:'Execute',level:24},{name:'Cleave',level:20},{name:'Intercept',level:30},{name:'Whirlwind',level:36},{name:'Pummel',level:38}
+  ]},
+  { name:'Paladin', abilities:[
+    {name:'Seal of Righteousness',level:1},{name:'Holy Light',level:1},{name:'Blessing of Might',level:4},{name:'Judgement',level:4},{name:'Purify',level:8},{name:'Lay on Hands',level:10},{name:'Hammer of Justice',level:8},{name:'Consecration',level:20},{name:'Redemption',level:12},{name:'Divine Shield',level:34}
+  ]},
+  { name:'Hunter', abilities:[
+    {name:'Auto Shot',level:1},{name:'Serpent Sting',level:4},{name:'Arcane Shot',level:6},{name:'Hunter’s Mark',level:6},{name:'Concussive Shot',level:8},{name:'Mend Pet',level:12},{name:'Multi-Shot',level:18},{name:'Aimed Shot',level:20},{name:'Feign Death',level:30},{name:'Tranquilizing Shot',level:60}
+  ]},
+  { name:'Rogue', abilities:[
+    {name:'Sinister Strike',level:1},{name:'Eviscerate',level:1},{name:'Backstab',level:4},{name:'Stealth',level:1},{name:'Gouge',level:6},{name:'Kick',level:12},{name:'Slice and Dice',level:10},{name:'Sprint',level:10},{name:'Blind',level:34},{name:'Vanish',level:22}
+  ]},
+  { name:'Priest', abilities:[
+    {name:'Smite',level:1},{name:'Power Word: Fortitude',level:1},{name:'Power Word: Shield',level:6},{name:'Renew',level:8},{name:'Resurrection',level:10},{name:'Psychic Scream',level:14},{name:'Heal',level:16},{name:'Dispel Magic',level:18},{name:'Flash Heal',level:20}
+  ]},
+  { name:'Shaman', abilities:[
+    {name:'Lightning Bolt',level:1},{name:'Healing Wave',level:1},{name:'Earth Shock',level:4},{name:'Rockbiter Weapon',level:1},{name:'Ghost Wolf',level:20},{name:'Reincarnation',level:30},{name:'Chain Lightning',level:32},{name:'Chain Heal',level:40}
+  ]},
+  { name:'Mage', abilities:[
+    {name:'Fireball',level:1},{name:'Conjure Water',level:4},{name:'Frostbolt',level:4},{name:'Arcane Missiles',level:8},{name:'Polymorph',level:8},{name:'Conjure Food',level:6},{name:'Blink',level:20},{name:'Evocation',level:20},{name:'Counterspell',level:24}
+  ]},
+  { name:'Warlock', abilities:[
+    {name:'Shadow Bolt',level:1},{name:'Immolate',level:1},{name:'Corruption',level:4},{name:'Fear',level:8},{name:'Curse of Agony',level:8},{name:'Drain Life',level:14},{name:'Summon Voidwalker',level:10},{name:'Summon Succubus',level:20},{name:'Summon Felhunter',level:30}
+  ]},
+  { name:'Druid', abilities:[
+    {name:'Wrath',level:1},{name:'Moonfire',level:4},{name:'Rejuvenation',level:4},{name:'Entangling Roots',level:8},{name:'Bear Form',level:10},{name:'Regrowth',level:12},{name:'Cat Form',level:20},{name:'Travel Form',level:30},{name:'Innervate',level:40}
+  ]}
+]};
+
+let DATA = load();
+let active = null;
+
+function renderClassList(filter=''){
+  const root = $('#classList'); root.innerHTML='';
+  DATA.classes
+    .slice().sort((a,b)=>a.name.localeCompare(b.name))
+    .filter(c=>c.name.toLowerCase().includes(filter.toLowerCase()))
+    .forEach(c=>{
+      const b = document.createElement('button');
+      b.className='class-btn'+(active&&active.name===c.name?' active':'');
+      b.textContent=c.name;
+      b.onclick=()=>{active=c; updateDetail(); document.querySelectorAll('.class-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active');};
+      root.appendChild(b);
+    });
+  if(!active && DATA.classes[0]){ active = DATA.classes[0]; updateDetail(); }
+}
+
+function updateDetail(){
+  const wrap = $('#tableWrap'); const title = $('#classTitle'); const cnt = $('#abilityCount');
+  if(!active){ title.textContent='Select a class'; wrap.innerHTML=''; cnt.textContent=''; return; }
+  title.textContent = active.name;
+  const q = ($('#filter').value||'').trim().toLowerCase();
+  const minL = parseInt($('#minLevel').value||'1',10);
+  const list = (active.abilities||[])
+    .filter(a=> a.level >= minL)
+    .filter(a=> a.name.toLowerCase().includes(q));
+  cnt.textContent = `${list.length} spells`;
+
+  const table = document.createElement('table');
+  table.innerHTML = '<thead><tr><th>Spell</th><th>Level learned</th></tr></thead>';
+  const tb = document.createElement('tbody');
+  list.sort((a,b)=> a.level-b.level || a.name.localeCompare(b.name)).forEach(a=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><strong>${a.name}</strong></td><td>${a.level}</td>`;
+    tb.appendChild(tr);
+  });
+  table.appendChild(tb);
+  wrap.innerHTML='';
+  wrap.appendChild(table);
+}
+
+$('#classSearch').addEventListener('input', e=> renderClassList(e.target.value));
+$('#filter').addEventListener('input', updateDetail);
+$('#minLevel').addEventListener('input', updateDetail);
+window.addEventListener('keydown', (e)=>{ if((e.key==='k' && (e.ctrlKey||e.metaKey))){ e.preventDefault(); $('#classSearch').focus(); } if(e.key==='/' && !e.ctrlKey && !e.metaKey){ e.preventDefault(); $('#filter').focus(); }});
+
+$('#exportBtn').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='vanilla-wow-spells.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1500);
+});
+$('#fileInput').addEventListener('change', (e)=>{
+  const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{
+    try{ const obj=JSON.parse(r.result); if(!obj || !Array.isArray(obj.classes)) throw new Error('Missing "classes" array'); DATA=obj; save(DATA); active=null; renderClassList($('#classSearch').value||''); alert('Imported!'); }
+    catch(err){ alert('Import failed: '+err.message); }
+  }; r.readAsText(f);
+});
+
+renderClassList('');
+updateDetail();
+</script>
+</body>
+</html>

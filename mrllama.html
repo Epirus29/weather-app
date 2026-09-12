@@ -418,12 +418,23 @@ footer p { max-width: 70ch; margin: 0 auto; }
     rolled.scrollIntoView({ block: 'center' });
   });
 
-  // Waypoint highlight
+  // Waypoint highlight: the last section whose top has passed a line near the top of the viewport
   const links = [...document.querySelectorAll('.waypoints a')];
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) links.forEach(l => l.setAttribute('aria-current', l.getAttribute('href') === '#' + e.target.id ? 'true' : 'false')); });
-  }, { rootMargin: '-20% 0px -70% 0px' });
-  document.querySelectorAll('section.group').forEach(s => io.observe(s));
+  const sections = links.map(l => document.querySelector(l.getAttribute('href')));
+  let lockUntil = 0;
+  function setCurrent(id) { links.forEach(l => l.setAttribute('aria-current', l.getAttribute('href') === '#' + id ? 'true' : 'false')); }
+  function spy() {
+    if (Date.now() < lockUntil) return;
+    const line = Math.min(140, innerHeight * 0.2);
+    let cur = sections[0];
+    sections.forEach(sec => { if (sec && !sec.classList.contains('empty') && sec.getBoundingClientRect().top <= line) cur = sec; });
+    if (innerHeight + scrollY >= document.documentElement.scrollHeight - 2) cur = sections[sections.length - 1];
+    setCurrent(cur.id);
+  }
+  links.forEach(l => l.addEventListener('click', () => { setCurrent(l.getAttribute('href').slice(1)); lockUntil = Date.now() + 900; }));
+  addEventListener('scroll', spy, { passive: true });
+  addEventListener('resize', spy);
+  spy();
 
   // Mana orb fallback for browsers without scroll-driven animations
   if (!(CSS.supports && CSS.supports('animation-timeline: scroll()'))) {

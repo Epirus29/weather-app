@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MrLlamaSC guide hub: every Diablo 2 guide, one page</title>
+<meta name="description" content="Unofficial hub for MrLlamaSC's Diablo 2 Resurrected guides on Icy Veins: every class build, leveling route, and farming run, plus his Twitch.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Eczar:wght@400;500;600&family=Mulish:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: dark;
+  --stone: #1E1A17;      /* dark stone */
+  --stone-2: #2A2420;    /* raised */
+  --parchment: #DCCBA8;  /* body text */
+  --ash: #9A8C78;        /* secondary */
+  --line: color-mix(in oklch, var(--parchment) 14%, transparent);
+  /* Diablo 2 item colors, muted, used as guide-type coding */
+  --unique: #C9A76A;     /* builds */
+  --magic: #7F86D9;      /* leveling */
+  --rune: #D98A3A;       /* farming */
+  --set: #6DB37A;        /* systems and reference */
+  --blood: #7A2222;
+  --display: "Eczar", "Iowan Old Style", Georgia, serif;
+  --text: "Mulish", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--stone); color: var(--parchment); font-family: var(--text); font-size: 1rem; line-height: 1.55; }
+h1, h2, h3 { font-family: var(--display); font-weight: 500; line-height: 1.1; margin: 0; text-wrap: balance; }
+a { color: inherit; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--unique); outline-offset: 3px; }
+[hidden] { display: none !important; }
+
+/* header */
+.top { padding: clamp(1.5rem, 5vh, 3.5rem) clamp(1rem, 5vw, 4rem) 1.5rem; border-bottom: 1px solid var(--line);
+  background: radial-gradient(90% 60% at 20% 0%, color-mix(in oklch, var(--blood) 45%, transparent), transparent 70%); }
+.top .row { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1rem 2rem; max-width: 1180px; margin: 0 auto; }
+.top h1 { font-size: clamp(2.2rem, 1.6rem + 3vw, 4rem); }
+.top h1 small { display: block; font-family: var(--text); font-weight: 400; font-size: 1.05rem; color: var(--ash); margin-top: .35rem; text-wrap: pretty; max-width: 48ch; }
+.links { display: flex; flex-wrap: wrap; gap: .5rem; }
+.links a { display: inline-flex; align-items: center; gap: .5rem; padding: .6rem 1rem; border: 1px solid var(--line); text-decoration: none; font-weight: 600; transition: border-color .2s, background .2s; }
+.links a:hover { border-color: var(--parchment); }
+.links a.twitch { background: #9146FF; border-color: #9146FF; color: #fff; }
+.links a.twitch:hover { background: #7a35e6; }
+.links a.twitch .dot { width: .55rem; height: .55rem; border-radius: 50%; background: #fff; animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .35; } }
+
+.tools { max-width: 1180px; margin: 1.5rem auto 0; display: grid; grid-template-columns: 1fr auto; gap: .75rem; }
+.tools input { width: 100%; padding: .8rem 1rem; background: var(--stone-2); color: var(--parchment); border: 1px solid var(--line); font: inherit; }
+.tools input::placeholder { color: var(--ash); }
+.tools .roll { padding: .8rem 1.1rem; border: 1px solid var(--unique); color: var(--unique); font-weight: 700; white-space: nowrap; }
+.tools .roll:hover { background: color-mix(in oklch, var(--unique) 12%, transparent); }
+.count { max-width: 1180px; margin: .6rem auto 0; color: var(--ash); font-size: .9rem; min-height: 1.4em; }
+@media (max-width: 560px) { .tools { grid-template-columns: 1fr; } }
+
+/* layout */
+.page { max-width: 1180px; margin: 0 auto; padding: 2rem clamp(1rem, 5vw, 4rem) 4rem; display: grid; grid-template-columns: 1fr; gap: 2rem; }
+@media (min-width: 900px) { .page { grid-template-columns: 220px minmax(0, 1fr); column-gap: 3.5rem; } .waypoints { position: sticky; top: 1.25rem; align-self: start; } }
+.waypoints h2 { font-size: 1rem; color: var(--ash); font-family: var(--text); font-weight: 600; margin-bottom: .5rem; }
+.waypoints ol { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--line); }
+.waypoints a { display: block; padding: .45rem .9rem; text-decoration: none; color: var(--ash); border-left: 2px solid transparent; margin-left: -1px; transition: color .2s, border-color .2s; }
+.waypoints a:hover, .waypoints a[aria-current="true"] { color: var(--parchment); border-left-color: var(--unique); }
+@media (max-width: 899px) { .waypoints ol { display: flex; flex-wrap: wrap; gap: .25rem; border: 0; } .waypoints a { border: 1px solid var(--line); margin: 0; padding: .35rem .7rem; font-size: .9rem; } .waypoints a[aria-current="true"] { border-color: var(--unique); } }
+
+/* sections */
+section.group { padding: 1.5rem 0 2rem; border-top: 1px solid var(--line); scroll-margin-top: 1rem; }
+section.group:first-child { border-top: 0; padding-top: 0; }
+.group header { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; margin-bottom: .9rem; }
+.group h2 { font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem); }
+.group header a.overview { color: var(--ash); font-size: .9rem; text-decoration-color: var(--line); }
+.group header a.overview:hover { color: var(--parchment); }
+.group .icon { width: 1.4em; height: 1.4em; vertical-align: -.3em; margin-right: .35rem; color: var(--unique); }
+.guides { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .5rem .75rem; }
+.guide a { display: grid; grid-template-columns: 4px 1fr; gap: .8rem; align-items: center; padding: .7rem .9rem .7rem 0; text-decoration: none; border-bottom: 1px solid var(--line); transition: background .15s; }
+.guide a::before { content: ""; height: 100%; background: var(--c, var(--unique)); border-radius: 2px; }
+.guide a:hover { background: color-mix(in oklch, var(--parchment) 5%, transparent); }
+.guide .t { font-weight: 600; }
+.guide .k { display: block; font-size: .8rem; color: var(--ash); }
+.guide[data-type="build"] a { --c: var(--unique); }
+.guide[data-type="leveling"] a { --c: var(--magic); }
+.guide[data-type="farming"] a { --c: var(--rune); }
+.guide[data-type="reference"] a { --c: var(--set); }
+.group.empty { display: none; }
+.legend { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; font-size: .85rem; color: var(--ash); margin: 0 0 1.5rem; }
+.legend span::before { content: ""; display: inline-block; width: .6em; height: .6em; margin-right: .4em; background: var(--c); border-radius: 1px; }
+
+/* random roll result */
+.rolled { border: 1px solid var(--unique); padding: 1rem 1.2rem; margin-bottom: 1.5rem; display: none; }
+.rolled.show { display: block; animation: drop .35s cubic-bezier(.2,.7,.2,1); }
+@keyframes drop { from { opacity: 0; translate: 0 -8px; } }
+.rolled p { margin: 0 0 .3rem; color: var(--ash); font-size: .9rem; }
+.rolled a { font-family: var(--display); font-size: 1.5rem; color: var(--unique); text-decoration: none; }
+.rolled a:hover { text-decoration: underline; }
+
+/* watch */
+.watch .player { aspect-ratio: 16 / 9; width: 100%; background: var(--stone-2); border: 1px solid var(--line); display: grid; place-items: center; overflow: hidden; }
+.watch iframe { width: 100%; height: 100%; border: 0; }
+.watch .fallback { text-align: center; padding: 2rem; color: var(--ash); }
+.watch .fallback a { color: var(--parchment); }
+.watch p { max-width: 60ch; color: var(--ash); }
+
+footer { padding: 2rem clamp(1rem, 5vw, 4rem) 3rem; border-top: 1px solid var(--line); color: var(--ash); font-size: .9rem; }
+footer p { max-width: 70ch; margin: 0 auto; }
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .links a.twitch .dot { animation: none; } .rolled.show { animation: none; } }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="row">
+    <h1>MrLlamaSC guide hub
+      <small>Every Diablo 2 Resurrected guide he wrote for Icy Veins, on one page. Pick a class, pick a build, go.</small>
+    </h1>
+    <nav class="links" aria-label="MrLlamaSC elsewhere">
+      <a class="twitch" href="https://www.twitch.tv/mrllamasc" target="_blank" rel="noopener"><span class="dot" aria-hidden="true"></span>Twitch</a>
+      <a href="https://www.youtube.com/mrllamasc" target="_blank" rel="noopener">YouTube</a>
+      <a href="https://twitter.com/mrllamasc" target="_blank" rel="noopener">X</a>
+      <a href="https://discord.gg/0cdE0TjHEACCSO2L" target="_blank" rel="noopener">Discord</a>
+    </nav>
+  </div>
+  <div class="tools">
+    <input id="q" type="search" placeholder="Search guides: hammerdin, javazon, baal, runes..." aria-label="Search guides" autocomplete="off">
+    <button class="roll" id="roll" type="button">Roll me a build</button>
+  </div>
+  <p class="count" id="count" aria-live="polite"></p>
+</header>
+
+<div class="page">
+  <aside class="waypoints" aria-label="Jump to a class">
+    <h2>Waypoints</h2>
+    <ol>
+      <li><a href="#amazon">Amazon</a></li>
+      <li><a href="#assassin">Assassin</a></li>
+      <li><a href="#barbarian">Barbarian</a></li>
+      <li><a href="#druid">Druid</a></li>
+      <li><a href="#necromancer">Necromancer</a></li>
+      <li><a href="#paladin">Paladin</a></li>
+      <li><a href="#sorceress">Sorceress</a></li>
+      <li><a href="#warlock">Warlock</a></li>
+      <li><a href="#farming">Farming runs</a></li>
+      <li><a href="#reference">Reference</a></li>
+      <li><a href="#watch">Watch live</a></li>
+    </ol>
+  </aside>
+
+  <main>
+    <div class="legend" aria-label="Color key">
+      <span style="--c:var(--unique)">Build</span>
+      <span style="--c:var(--magic)">Fastest leveling</span>
+      <span style="--c:var(--rune)">Farming run</span>
+      <span style="--c:var(--set)">Reference</span>
+    </div>
+    <div class="rolled" id="rolled" aria-live="polite"><p>Your next character:</p><a id="rolledLink" href="#" target="_blank" rel="noopener"></a></div>
+
+    <section class="group" id="amazon">
+      <header><h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 3c6 2 6 16 0 18M5 3l14 9L5 21M19 12H9"/></svg>Amazon</h2><a class="overview" href="https://www.icy-veins.com/d2/amazon-class-and-builds" target="_blank" rel="noopener">Class overview</a></header>
+      <ul class="guides">
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/lightning-fury-charged-strike-amazon-javazon-build" target="_blank" rel="noopener"><span class="t">Javazon<span class="k">Lightning Fury / Charged Strike</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/frost-fire-bow-amazon-bowazon-build" target="_blank" rel="noopener"><span class="t">Frost / Fire Bowazon<span class="k">Elemental bow</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/multiple-shot-guided-arrow-amazon-physical-bowazon-build" target="_blank" rel="noopener"><span class="t">Physical Bowazon<span class="k">Multiple Shot / Guided Arrow</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/freezing-arrow-frostmaiden-amazon-build" target="_blank" rel="noopener"><span class="t">Frostmaiden<span class="k">Freezing Arrow</span></span></a></li>
+        <li class="guide" data-type="leveling"><a href="https://www.icy-veins.com/d2/amazon-fastest-leveling-build" target="_blank" rel="noopener"><span class="t">Amazon fastest leveling<span class="k">Speedrun route, level by level</span></span></a></li>
+      </ul>
+    </section>
+
+    <section class="group" id="assassin">
+      <header><h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 20c2-8 6-12 8-16M9 20c2-6 5-9 7-12M14 20c1-4 3-6 5-8"/></svg>Assassin</h2><a class="overview" href="https://www.icy-veins.com/d2/assassin-class-and-builds" target="_blank" rel="noopener">Class overview</a></header>
+      <ul class="guides">
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/lightning-death-sentry-assassin-trapsin-build" target="_blank" rel="noopener"><span class="t">Trapsin<span class="k">Lightning Sentry / Death Sentry</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/mosaic-phoenix-strike-assassin-build" target="_blank" rel="noopener"><span class="t">Phoenix Strike (Mosaic)<span class="k">Martial arts</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/dragon-talon-assassin-kicksin-build" target="_blank" rel="noopener"><span class="t">Kicksin<span class="k">Dragon Talon</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/dragon-tail-assassin-build" target="_blank" rel="noopener"><span class="t">Dragon Tail Assassin<span class="k">Fire kicks</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/blade-fury-assassin-bladesin-build" target="_blank" rel="noopener"><span class="t">Bladesin<span class="k">Blade Fury</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/whirlwind-assassin-whirlwindsin-build" target="_blank" rel="noopener"><span class="t">Whirlwindsin<span class="k">Chaos claws</span></span></a></li>
+        <li class="guide" data-type="leveling"><a href="https://www.icy-veins.com/d2/assassin-fastest-leveling-build" target="_blank" rel="noopener"><span class="t">Assassin fastest leveling<span class="k">Speedrun route, level by level</span></span></a></li>
+      </ul>
+    </section>
+
+    <section class="group" id="barbarian">
+      <header><h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 20 18 8M18 8l2-2M14 4c2 0 6 2 6 6l-3 1-4-4z"/></svg>Barbarian</h2><a class="overview" href="https://www.icy-veins.com/d2/barbarian-class-and-builds" target="_blank" rel="noopener">Class overview</a></header>
+      <ul class="guides">
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/whirlwind-barbarian-build" target="_blank" rel="noopener"><span class="t">Whirlwind Barbarian<span class="k">The classic</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/frenzy-barbarian-build" target="_blank" rel="noopener"><span class="t">Frenzy Barbarian<span class="k">Dual wield, very fast</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/berserk-barbarian-build" target="_blank" rel="noopener"><span class="t">Berserk Barbarian<span class="k">Magic damage, no immunes</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/throw-barbarian-build" target="_blank" rel="noopener"><span class="t">Throw Barbarian<span class="k">Ranged</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/war-cry-barbarian-singer-build" target="_blank" rel="noopener"><span class="t">Singer<span class="k">War Cry</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/gold-find-barbarian-build" target="_blank" rel="noopener"><span class="t">Gold Find Barbarian<span class="k">Travincal runs</span></span></a></li>
+        <li class="guide" data-type="leveling"><a href="https://www.icy-veins.com/d2/barbarian-fastest-leveling-build" target="_blank" rel="noopener"><span class="t">Barbarian fastest leveling<span class="k">Speedrun route, level by level</span></span></a></li>
+      </ul>
+    </section>
+
+    <section class="group" id="druid">
+      <header><h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 4C10 4 4 10 4 20c10 0 16-6 16-16zM4 20 14 10"/></svg>Druid</h2><a class="overview" href="https://www.icy-veins.com/d2/druid-class-and-builds" target="_blank" rel="noopener">Class overview</a></header>
+      <ul class="guides">
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/wind-druid-build" target="_blank" rel="noopener"><span class="t">Wind Druid<span class="k">Tornado / Hurricane</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/fire-druid-build" target="_blank" rel="noopener"><span class="t">Fire Druid<span class="k">Fissure / Armageddon</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/fury-druid-build" target="_blank" rel="noopener"><span class="t">Fury Druid<span class="k">Werewolf melee</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/summoner-druid-build" target="_blank" rel="noopener"><span class="t">Summoner Druid<span class="k">Wolves, bear, spirits</span></span></a></li>
+        <li class="guide" data-type="leveling"><a href="https://www.icy-veins.com/d2/druid-fastest-leveling-build" target="_blank" rel="noopener"><span class="t">Druid fastest leveling<span class="k">Speedrun route, level by level</span></span></a></li>
+      </ul>
+    </section>
+
+    <section class="group" id="necromancer">
+      <header><h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 3a7 7 0 0 0-7 7c0 3 2 5 3 6v4h8v-4c1-1 3-3 3-6a7 7 0 0 0-7-7zM9 11h.01M15 11h.01M10 20v-3M14 20v-3"/></svg>Necromancer</h2><a class="overview" href="https://www.icy-veins.com/d2/necromancer-class-and-builds" target="_blank" rel="noopener">Class overview</a></header>
+      <ul class="guides">
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/summoner-necromancer-build" target="_blank" rel="noopener"><span class="t">Summoner Necromancer<span class="k">Skeleton army, best starter</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/bone-necromancer-build" target="_blank" rel="noopener"><span class="t">Bone Necromancer<span class="k">Bone Spear / Bone Spirit</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/poison-necromancer-build" target="_blank" rel="noopener"><span class="t">Poison Necromancer<span class="k">Poison Nova</span></span></a></li>
+        <li class="guide" data-type="leveling"><a href="https://www.icy-veins.com/d2/necromancer-fastest-leveling-build" target="_blank" rel="noopener"><span class="t">Necromancer fastest leveling<span class="k">Speedrun route, level by level</span></span></a></li>
+      </ul>
+    </section>
+
+    <section class="group" id="paladin">
+      <header><h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 3 5 6v6c0 4 3 7 7 9 4-2 7-5 7-9V6zM12 8v7M9 11h6"/></svg>Paladin</h2><a class="overview" href="https://www.icy-veins.com/d2/paladin-class-and-builds" target="_blank" rel="noopener">Class overview</a></header>
+      <ul class="guides">
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/blessed-hammer-paladin-hammerdin-build" target="_blank" rel="noopener"><span class="t">Hammerdin<span class="k">Blessed Hammer</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/smiter-paladin-build" target="_blank" rel="noopener"><span class="t">Smiter<span class="k">Uber killer</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/zealot-paladin-build" target="_blank" rel="noopener"><span class="t">Zealot<span class="k">Zeal / Fanaticism</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/dream-zealot-paladin-build" target="_blank" rel="noopener"><span class="t">Dream Zealot<span class="k">Holy Shock stacking</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/avenger-paladin-build" target="_blank" rel="noopener"><span class="t">Avenger<span class="k">Vengeance / Conviction</span></span></a></li>
+        <li class="guide" data-type="leveling"><a href="https://www.icy-veins.com/d2/paladin-fastest-leveling-build" target="_blank" rel="noopener"><span class="t">Paladin fastest leveling<span class="k">Speedrun route, level by level</span></span></a></li>
+      </ul>
+    </section>
+
+    <section class="group" id="sorceress">
+      <header><h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="10" r="6"/><path d="M12 16v5M9 21h6M8 8l2 2M16 8l-2 2"/></svg>Sorceress</h2><a class="overview" href="https://www.icy-veins.com/d2/sorceress-class-and-builds" target="_blank" rel="noopener">Class overview</a></header>
+      <ul class="guides">
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/blizzard-sorceress-build" target="_blank" rel="noopener"><span class="t">Blizzard Sorceress<span class="k">Best starter caster</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/lightning-sorceress-build" target="_blank" rel="noopener"><span class="t">Lightning Sorceress<span class="k">Lightning / Chain Lightning</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/fireball-sorceress-build" target="_blank" rel="noopener"><span class="t">Fireball Sorceress<span class="k">Fireball / Meteor</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/meteor-frozen-orb-sorceress-meteorb-build" target="_blank" rel="noopener"><span class="t">Meteorb<span class="k">Meteor / Frozen Orb</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/enchantress-sorceress-build" target="_blank" rel="noopener"><span class="t">Enchantress<span class="k">Enchant, melee or bow</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/bear-sorceress-build" target="_blank" rel="noopener"><span class="t">Bear Sorceress<span class="k">Beast runeword, werebear</span></span></a></li>
+        <li class="guide" data-type="leveling"><a href="https://www.icy-veins.com/d2/sorceress-fastest-leveling-build" target="_blank" rel="noopener"><span class="t">Sorceress fastest leveling<span class="k">Speedrun route, level by level</span></span></a></li>
+      </ul>
+    </section>
+
+    <section class="group" id="warlock">
+      <header><h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 21c-4 0-7-3-7-7 0-3 2-5 3-7 0 2 1 3 2 3 0-3 1-5 3-7 0 3 2 4 3 6 1-1 1-2 1-3 2 2 2 5 2 8 0 4-3 7-7 7z"/></svg>Warlock</h2><a class="overview" href="https://www.icy-veins.com/d2/warlock-class-and-builds" target="_blank" rel="noopener">Class overview</a></header>
+      <ul class="guides">
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/echoing-strike-hex-purge-warlock-build" target="_blank" rel="noopener"><span class="t">Echoing Strike / Hex Purge<span class="k">Top melee build</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/magic-warlock-build" target="_blank" rel="noopener"><span class="t">Magic Warlock<span class="k">Chaos tree, magic path</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/fire-warlock-build" target="_blank" rel="noopener"><span class="t">Fire Warlock<span class="k">Chaos tree, fire path</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/blood-boil-warlock-build" target="_blank" rel="noopener"><span class="t">Blood Boil Warlock<span class="k">Updated for 3.2</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/eldritch-blast-warlock-build" target="_blank" rel="noopener"><span class="t">Eldritch Blast Warlock<span class="k">Ranged eldritch</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/cleave-warlock-build" target="_blank" rel="noopener"><span class="t">Cleave Warlock<span class="k">Two-hander in one hand</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/echoing-strike-warlock-build" target="_blank" rel="noopener"><span class="t">Echoing Strike / Mirrored Blades<span class="k">Melee</span></span></a></li>
+        <li class="guide" data-type="build"><a href="https://www.icy-veins.com/d2/demon-warlock-build" target="_blank" rel="noopener"><span class="t">Demon Summoner Warlock<span class="k">Bind demons</span></span></a></li>
+        <li class="guide" data-type="leveling"><a href="https://www.icy-veins.com/d2/warlock-fastest-leveling-build" target="_blank" rel="noopener"><span class="t">Warlock fastest leveling<span class="k">Speedrun route, level by level</span></span></a></li>
+        <li class="guide" data-type="reference"><a href="https://www.icy-veins.com/d2/warlock-overview" target="_blank" rel="noopener"><span class="t">Warlock class overview<span class="k">Trees, books, what's new</span></span></a></li>
+        <li class="guide" data-type="reference"><a href="https://www.icy-veins.com/d2/list-of-demon-binds" target="_blank" rel="noopener"><span class="t">Demon binding list<span class="k">Which demons, what they do</span></span></a></li>
+      </ul>
+    </section>
+
+    <section class="group" id="farming">
+      <header><h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 18h16M6 18V9l6-4 6 4v9M10 18v-4h4v4"/></svg>Farming runs</h2><a class="overview" href="https://www.icy-veins.com/d2/farming-overview-and-guides" target="_blank" rel="noopener">Farming overview</a></header>
+      <ul class="guides">
+        <li class="guide" data-type="farming"><a href="https://www.icy-veins.com/d2/andariel-run-farming-guide" target="_blank" rel="noopener"><span class="t">Andariel runs<span class="k">Act 1, early ladder staple</span></span></a></li>
+        <li class="guide" data-type="farming"><a href="https://www.icy-veins.com/d2/mephisto-run-farming-guide" target="_blank" rel="noopener"><span class="t">Mephisto runs<span class="k">Act 3, the moat trick</span></span></a></li>
+        <li class="guide" data-type="farming"><a href="https://www.icy-veins.com/d2/diablo-farming-guide-chaos-run" target="_blank" rel="noopener"><span class="t">Chaos runs<span class="k">Act 4, Diablo</span></span></a></li>
+        <li class="guide" data-type="farming"><a href="https://www.icy-veins.com/d2/baal-run-farming-guide" target="_blank" rel="noopener"><span class="t">Baal runs<span class="k">Act 5, throne and Baal</span></span></a></li>
+        <li class="guide" data-type="farming"><a href="https://www.icy-veins.com/d2/secret-cow-level-farming-guide" target="_blank" rel="noopener"><span class="t">Cow Level runs<span class="k">Moo</span></span></a></li>
+        <li class="guide" data-type="farming"><a href="https://www.icy-veins.com/d2/lower-kurast-farming-guide" target="_blank" rel="noopener"><span class="t">Lower Kurast runs<span class="k">Super chests, high runes</span></span></a></li>
+        <li class="guide" data-type="farming"><a href="https://www.icy-veins.com/d2/terror-zones-guide" target="_blank" rel="noopener"><span class="t">Terror Zones<span class="k">Rotation and how to use them</span></span></a></li>
+      </ul>
+    </section>
+
+    <section class="group" id="reference">
+      <header><h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 4h11l3 3v13H5zM8 9h8M8 13h8M8 17h5"/></svg>Reference</h2><a class="overview" href="https://www.icy-veins.com/d2/" target="_blank" rel="noopener">Icy Veins D2 home</a></header>
+      <ul class="guides">
+        <li class="guide" data-type="reference"><a href="https://www.icy-veins.com/d2/pvm-build-rankings-a-diablo-2-tier-list" target="_blank" rel="noopener"><span class="t">PvM build tier list<span class="k">Every build ranked</span></span></a></li>
+        <li class="guide" data-type="reference"><a href="https://www.icy-veins.com/d2/rune-word-guide" target="_blank" rel="noopener"><span class="t">Rune words<span class="k">Full list</span></span></a></li>
+        <li class="guide" data-type="reference"><a href="https://www.icy-veins.com/d2/rune-finding-guide" target="_blank" rel="noopener"><span class="t">Rune finding<span class="k">Where high runes actually drop</span></span></a></li>
+        <li class="guide" data-type="reference"><a href="https://www.icy-veins.com/d2/loot-filter" target="_blank" rel="noopener"><span class="t">Loot filter<span class="k">Setup and presets</span></span></a></li>
+        <li class="guide" data-type="reference"><a href="https://www.icy-veins.com/d2/reign-of-the-warlock-overview-for-diablo-ii-resurrected" target="_blank" rel="noopener"><span class="t">Reign of the Warlock overview<span class="k">What the expansion changed</span></span></a></li>
+        <li class="guide" data-type="reference"><a href="https://www.icy-veins.com/d2/reign-of-the-warlock-endgame-changes-for-diablo-ii-resurrected" target="_blank" rel="noopener"><span class="t">Endgame changes<span class="k">Colossal Ancients, new ubers</span></span></a></li>
+      </ul>
+    </section>
+
+    <section class="group watch" id="watch">
+      <header><h2>Watch live</h2></header>
+      <div class="player" id="player">
+        <div class="fallback">Stream embeds only load on a real web host. <a href="https://www.twitch.tv/mrllamasc" target="_blank" rel="noopener">Open twitch.tv/mrllamasc</a> instead.</div>
+      </div>
+      <p>Streaming Diablo 2 since 2014: speedruns, guide runs, and challenge characters. When he's offline the player shows the latest VOD.</p>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <p>Unofficial fan hub. All guides are written by MrLlamaSC and hosted on Icy Veins; this page only links to them. Not affiliated with MrLlamaSC, Icy Veins, or Blizzard Entertainment.</p>
+</footer>
+
+<script>
+(() => {
+  const guides = [...document.querySelectorAll('.guide')];
+  const groups = [...document.querySelectorAll('section.group:not(.watch)')];
+  const q = document.getElementById('q');
+  const count = document.getElementById('count');
+  const total = guides.length;
+
+  function filter() {
+    const term = q.value.trim().toLowerCase();
+    let shown = 0;
+    guides.forEach(g => {
+      const hit = !term || g.textContent.toLowerCase().includes(term) || g.closest('section').id.includes(term);
+      g.hidden = !hit; if (hit) shown++;
+    });
+    groups.forEach(s => s.classList.toggle('empty', !s.querySelector('.guide:not([hidden])')));
+    count.textContent = term ? `${shown} of ${total} guides match` : `${total} guides`;
+  }
+  q.addEventListener('input', filter);
+  filter();
+
+  // Roll a random build
+  const rolled = document.getElementById('rolled'), rolledLink = document.getElementById('rolledLink');
+  document.getElementById('roll').addEventListener('click', () => {
+    const builds = guides.filter(g => g.dataset.type === 'build');
+    const pick = builds[Math.floor(Math.random() * builds.length)];
+    const a = pick.querySelector('a');
+    rolledLink.href = a.href;
+    rolledLink.textContent = pick.querySelector('.t').firstChild.textContent + ' (' + pick.closest('section').querySelector('h2').textContent.trim() + ')';
+    rolled.classList.remove('show'); void rolled.offsetWidth; rolled.classList.add('show');
+    rolled.scrollIntoView({ block: 'nearest' });
+  });
+
+  // Waypoint highlight
+  const links = [...document.querySelectorAll('.waypoints a')];
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) links.forEach(l => l.setAttribute('aria-current', l.getAttribute('href') === '#' + e.target.id ? 'true' : 'false')); });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  document.querySelectorAll('section.group').forEach(s => io.observe(s));
+
+  // Twitch embed: only works when served from a real hostname (Twitch requires a matching parent domain)
+  const host = location.hostname;
+  if (host && host !== 'localhost') {
+    const f = document.createElement('iframe');
+    f.src = `https://player.twitch.tv/?channel=mrllamasc&parent=${host}&muted=true`;
+    f.allowFullscreen = true; f.title = 'MrLlamaSC on Twitch';
+    document.getElementById('player').replaceChildren(f);
+  }
+})();
+</script>
+</body>
+</html>
